@@ -7,8 +7,8 @@ object coliseo {
     //Metodos de indicacion
     method combateEntreGrupos() {
         if (grupos.size() >= 2) {
-            const grupo1 = grupos.anyOne()
-            const grupo2 = grupos.anyOne()
+            const grupo1 = grupos.min({grupo => grupo.peleas()})
+            const grupo2 = grupos.filter({grupo => grupo != grupo1}).min({grupo => grupo.peleas()})
 
             grupo1.combate(grupo2)
         }
@@ -16,10 +16,11 @@ object coliseo {
 
     method combateEntreGrupoYGladiador() {
         if (not grupos.isEmpty() and not gladiadoresSueltos.isEmpty()) {
-            const grupo = grupos.anyOne()
+            const grupo = grupos.min({grupo => grupo.peleas()})
             const gladiador = gladiadoresSueltos.anyOne()
 
-            gladiador.pelear(grupo.campeon())
+            gladiador.pelear(grupo.campeonActual())
+            grupo.aumentarPeleas()
         }
     }
 
@@ -38,9 +39,9 @@ object coliseo {
 }
 
 
-class Grupos {
+class Grupo {
     //Propiedades a la hora de instanciar
-    const property gladiadores
+    const gladiadores = []
     const property fundador 
     const coFundador
     //Variables
@@ -51,6 +52,7 @@ class Grupos {
     method peleas() = peleas
     method campeonActual() = self.gladiadoresConVida().max({gladiador => gladiador.poderDeAtaque()})
     method gladiadoresConVida() = gladiadores.filter({gladiador => gladiador.vida() > 0})
+    method estanTodosCurados() = gladiadores.all({gladiador => gladiador.vida() == 100})
     
     //Metodos de indicacion
     method combate(otroGrupo) {

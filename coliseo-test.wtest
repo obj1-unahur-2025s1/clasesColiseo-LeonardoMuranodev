@@ -1,0 +1,73 @@
+import gladiadores.*
+import coliseo.*
+
+
+describe "test del Coliseo" {
+
+  //Armas
+  const dagaDeBronce = new ArmaDeFilo(filo=0.6, longitud=40)
+  const dagaDePlata = new ArmaDeFilo(filo=0.7, longitud=45)
+  const espadaDeBronce = new ArmaDeFilo(filo=0.8, longitud=50)
+  const espadaDePlata = new ArmaDeFilo(filo=0.9, longitud=60)
+  const mazoDeBronce = new ArmaCotundente(peso=10)
+  const mazoDePlata = new ArmaCotundente(peso=12)
+
+
+  //Gladiadores
+  const maximo = new Mirmillon(arma=espadaDePlata, casco=null, escudo=null, fuerza=25)
+  const espartaco = new Mirmillon(arma=espadaDeBronce, casco=cascoPunteado, escudo=null, fuerza=20)
+  const crixo = new Dimachaerus(destreza=12, armas=[dagaDeBronce, dagaDePlata])
+  const gannicus = new Dimachaerus(destreza=15, armas=[mazoDeBronce, mazoDePlata])
+  const batiato = new Dimachaerus(destreza=10, armas=[dagaDeBronce, mazoDePlata])
+
+  //Defensas
+  const cascoPunteado = new Casco()
+  const escudoDeBronce = new Escudo(luchador=espartaco)
+  const escudoDePlata = new Escudo(luchador=maximo)
+
+  //Grupos
+  const grupo1 = new Grupo(fundador=maximo, coFundador=espartaco)
+  const grupo2 = new Grupo(fundador=crixo, coFundador=gannicus)
+
+  method initialize() {
+    escudoDeBronce.asignarALuchador()
+    escudoDePlata.asignarALuchador()
+    grupo1.agregarGladiadores([maximo, espartaco])
+    grupo2.agregarGladiadores([crixo, gannicus])
+    coliseo.agregarGrupo(grupo1)
+    coliseo.agregarGrupo(grupo2)
+    coliseo.agregarGladiadorSuelto(batiato)
+  }
+  
+  test "El nombre del grupo 1 es 'mirmillolandia' y el del grupo 2 es D-98"{
+    assert.equals("mirmillolandia", grupo1.nombre())
+    assert.equals("D-98" ,grupo2.nombre())
+  }
+
+  test "El grupo 1 pelea con el grupo 2" {
+    coliseo.combateEntreGrupos()
+    assert.equals(1, grupo1.peleas())
+    assert.equals(1, grupo2.peleas())
+    assert.equals(45.5, maximo.vida())
+    assert.equals(0, crixo.vida())
+    assert.equals(28.5, gannicus.vida())
+    assert.equals(13, crixo.destreza())
+    assert.equals(16, gannicus.destreza())
+  }
+
+  test "El grupo 1 pelea con el gladiador suelto batiato" {
+    coliseo.combateEntreGrupoYGladiador()
+    assert.equals(1, grupo1.peleas())
+    assert.equals(0, grupo2.peleas())
+    assert.equals(75.5, maximo.vida())
+    assert.equals(26.5, batiato.vida())
+    assert.equals(11, batiato.destreza())
+  }
+
+  test "El grupo 1 pelea con el grupo 2 pero luego el coliseo cura a todos" {
+    coliseo.combateEntreGrupos()
+    coliseo.curarATodos()
+    assert.that(grupo1.estanTodosCurados())
+    assert.that(grupo2.estanTodosCurados())
+  }
+}

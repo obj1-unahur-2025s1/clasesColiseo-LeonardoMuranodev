@@ -18,7 +18,9 @@ class Mirmillon {
   //Metodos de indicacion
   method pelear(gladiador) {
     self.atacar(gladiador)
-    gladiador.atacar(self)
+    if (gladiador.vida() > 0) {
+      gladiador.atacar(self)
+    }
   }
   method atacar(gladiador) {
     gladiador.recibirDaño(self.poderDeAtaque() - gladiador.defensa())
@@ -45,12 +47,14 @@ class Dimachaerus {
   method poderDeAtaque() = self.fuerza() + armas.sum({arma => arma.poderDeAtaque()})
   method defensa() = destreza / 2
   method vida() = vida
-  method generarNombreDeGrupo(otroFundador) = "D-" + (self.poderDeAtaque() + otroFundador.poderDeAtaque()).toString()
+  method generarNombreDeGrupo(otroFundador) = "D-" + (self.poderDeAtaque() + otroFundador.poderDeAtaque()).round().toString()
 
   //Metodos de indicacion
   method pelear(gladiador) {
     self.atacar(gladiador)
-    gladiador.atacar(self)
+    if (gladiador.vida() > 0) {
+      gladiador.atacar(self)
+    }
   }
   method atacar(gladiador) {
     gladiador.recibirDaño(self.poderDeAtaque() - gladiador.defensa())
@@ -64,7 +68,6 @@ class Dimachaerus {
     vida = 100
   }
 }
-
 
 
 //Armas
@@ -94,5 +97,10 @@ class Casco {
 
 class Escudo {
   var property luchador
+
+  method asignarALuchador() {
+    luchador.casco(self)
+  }
+  
   method armadura() = 5 + luchador.destreza() * 0.1
 }
