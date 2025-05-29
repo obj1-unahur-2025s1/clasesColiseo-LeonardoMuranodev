@@ -1,86 +1,77 @@
-class Mirmillon {
-  //Propiedades a la hora de instanciar
-  const property arma
-  var property casco
-  var property escudo
-  var property fuerza
+import gladiadores.*
 
-  //Variables
-  var vida = 100
+object coliseo {
+    const grupos = []
+    const gladiadoresSueltos = []
 
-  //Metodos de consulta
-  method destreza() = 15
-  method poderDeAtaque() = arma.poderDeAtaque() + fuerza
-  method defensa() = self.destreza() + if(casco == null) 0 else casco.armadura() + if(escudo == null) 0 else escudo.armadura()
+    //Metodos de indicacion
+    method combateEntreGrupos() {
+        if (grupos.size() >= 2) {
+            const grupo1 = grupos.anyOne()
+            const grupo2 = grupos.anyOne()
 
-  //Metodos de indicacion
-  method pelear(gladiador) {
-    self.atacar(gladiador)
-    gladiador.atacar(self)
-  }
-  method atacar(gladiador) {
-    gladiador.recibirDaño(self.poderDeAtaque() - gladiador.defensa())
-  }
-  method recibirDaño(unDaño) {
-    vida = 0.max(vida - unDaño)
-  }
-}
+            grupo1.combate(grupo2)
+        }
+    }
 
-class Dimachaerus {
-  //Propiedades a la hora de instanciar
-  const property armas
-  var property destreza
+    method combateEntreGrupoYGladiador() {
+        if (not grupos.isEmpty() and not gladiadoresSueltos.isEmpty()) {
+            const grupo = grupos.anyOne()
+            const gladiador = gladiadoresSueltos.anyOne()
 
-  //Variables
-  var vida = 100
+            gladiador.pelear(grupo.campeon())
+        }
+    }
 
-  //Metodos de consulta
-  method fuerza() = 10
-  method poderDeAtaque() = self.fuerza() + armas.sum({arma => arma.poderDeAtaque()})
-  method defensa() = destreza / 2
+    method curarATodos() {
+        gladiadoresSueltos.forEach({gladiador => gladiador.curarVida()})
+        grupos.forEach({grupo => grupo.curarAIntegrantes()})
+    }
 
-  //Metodos de indicacion
-  method pelear(gladiador) {
-    self.atacar(gladiador)
-    gladiador.atacar(self)
-  }
-  method atacar(gladiador) {
-    gladiador.recibirDaño(self.poderDeAtaque() - gladiador.defensa())
-    destreza += 1
-  }
-  method recibirDaño(unDaño) {
-    vida = 0.max(vida - unDaño)
-  }
+    method agregarGrupo(unGrupo) {
+        grupos.add(unGrupo)
+    } 
+
+    method agregarGladiadorSuelto(unGladiador) {
+        gladiadoresSueltos.add(unGladiador)
+    } 
 }
 
 
+class Grupos {
+    //Propiedades a la hora de instanciar
+    const property gladiadores
+    const property fundador 
+    const coFundador
+    //Variables
+    var peleas = 0
 
-//Armas
-class ArmaDeFilo {
-  const property filo
-  const property longitud
+    //Metodos de consulta
+    method nombre() = fundador.generarNombreDeGrupo(coFundador)
+    method peleas() = peleas
+    method campeonActual() = self.gladiadoresConVida().max({gladiador => gladiador.poderDeAtaque()})
+    method gladiadoresConVida() = gladiadores.filter({gladiador => gladiador.vida() > 0})
+    
+    //Metodos de indicacion
+    method combate(otroGrupo) {
+        (1..3).forEach({n => self.campeonActual().pelear(otroGrupo.campeonActual())})
+        self.aumentarPeleas()
+        otroGrupo.aumentarPeleas()
+    }
 
-  method poderDeAtaque() = filo * longitud
+    method curarAIntegrantes() {
+        gladiadores.forEach({gladiador => gladiador.curarVida()})
+    }
 
-  method filo() = filo.min(topeFilo.tope())
-}
+    method agregarGladiadores(listaGladiadores) {
+        gladiadores.addAll(listaGladiadores)
+    }
 
-class ArmaCotundente {
-  const property peso
+    method quitarGladiadores(listaGladiadores) {
+        gladiadores.removeAll(listaGladiadores)
+    }
 
-  method poderDeAtaque() = peso
-}
-
-object topeFilo {
-  const property tope = 1 
-}
-
-//Defensas
-class Casco {
-  method armadura() = 10
-}
-
-class Escudo {
-  var property luchador
-  method armadura() = 5 + luchador.destreza() * 0.1
+    method aumentarPeleas() {
+        peleas += 1
+    }
 }
